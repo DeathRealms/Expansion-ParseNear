@@ -1,0 +1,35 @@
+plugins {
+    id 'java'
+    id 'com.github.johnrengelman.shadow' version '5.1.0'
+}
+
+group = pluginGroup
+version = pluginVersion
+
+sourceCompatibility = '1.8'
+
+tasks.withType(JavaCompile) {
+    options.encoding("UTF-8")
+}
+
+repositories {
+    maven {
+        url = 'https://hub.spigotmc.org/nexus/content/repositories/snapshots/'
+    }
+    maven {
+        url = 'https://oss.sonatype.org/content/groups/public/'
+    }
+    maven {
+        url = 'https://repo.extendedclip.com/content/repositories/placeholderapi/'
+    }
+}
+
+dependencies {
+    compileOnly 'org.spigotmc:spigot-api:+'
+    compileOnly 'me.clip:placeholderapi:+'
+}
+
+shadowJar {
+    minimize()
+    archiveFileName = 'Expansion-ParseNear.jar'
+}
