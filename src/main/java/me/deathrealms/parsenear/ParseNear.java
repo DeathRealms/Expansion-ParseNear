@@ -9,6 +9,7 @@ import org.bukkit.entity.Player;
 
 import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class ParseNear extends PlaceholderExpansion {
 
@@ -39,7 +40,12 @@ public class ParseNear extends PlaceholderExpansion {
         List<Entity> nearbyEntities = player.getWorld().getEntities();
 
         if (radius != null) {
-            nearbyEntities = player.getNearbyEntities(radius, radius, radius);
+            nearbyEntities = nearbyEntities.stream()
+                    .filter(entity -> {
+                        double distance = entity.getLocation().distance(player.getLocation());
+                        return distance <= radius;
+                    })
+                    .collect(Collectors.toList());
             args = (String[]) ArrayUtils.remove(args, 0);
         }
 
