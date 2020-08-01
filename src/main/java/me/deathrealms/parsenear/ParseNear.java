@@ -3,10 +3,10 @@ package me.deathrealms.parsenear;
 import com.google.common.primitives.Ints;
 import me.clip.placeholderapi.PlaceholderAPI;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
-import org.apache.commons.lang.ArrayUtils;
-import org.bukkit.entity.Entity;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -30,14 +30,20 @@ public class ParseNear extends PlaceholderExpansion {
 
     @Override
     public String getVersion() {
-        return "1.0.0";
+        return "1.1.0";
     }
 
     @Override
-    public String onPlaceholderRequest(Player player, String identifier) {
+    public String onRequest(OfflinePlayer offlinePlayer, String identifier) {
+        Player player = (Player) offlinePlayer;
+
+        if (player == null) {
+            return "";
+        }
+
         String[] args = identifier.split("_");
         Integer radius = Ints.tryParse(args[0]);
-        List<Entity> nearbyEntities = player.getWorld().getEntities();
+        List<Player> nearbyEntities = player.getWorld().getPlayers();
 
         if (radius != null) {
             nearbyEntities = nearbyEntities.stream()
@@ -46,17 +52,17 @@ public class ParseNear extends PlaceholderExpansion {
                         return distance <= radius;
                     })
                     .collect(Collectors.toList());
-            args = (String[]) ArrayUtils.remove(args, 0);
+            args = Arrays.copyOfRange(args, 1, args.length);
         }
 
-        Player near = (Player) nearbyEntities.stream()
-                .filter(entity -> entity instanceof Player)
+        OfflinePlayer near = nearbyEntities.stream()
                 .filter(entity -> entity != player)
-                .filter(entity -> entity.getWorld() == player.getWorld())
                 .min(Comparator.comparingDouble(entity -> entity.getLocation().distanceSquared(player.getLocation())))
                 .orElse(null);
 
-        if (near == null) return "";
+        if (near == null) {
+            return "";
+        }
 
         return PlaceholderAPI.setPlaceholders(near, "%" + String.join("_", args) + "%");
     }
